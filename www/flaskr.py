@@ -25,6 +25,12 @@ def login():
         return render_template('showStudent.html')
 
 
+@app.route('/signout')
+def signout():
+    request.cookies.delete('username')
+    return render_template('login.html')
+
+
 @app.route('/auth')
 def authenticate():
     session = DBSession()
