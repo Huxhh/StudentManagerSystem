@@ -5,6 +5,7 @@ from flask import Flask, request, session, g, redirect, url_for, \
      abort, render_template, flash, make_response, json
 from models import DBSession, Admin, Student
 from responsebody import ResponseBody
+from page import Page
 
 
 # db = mysql.connect(host = '127.0.0.1', user = 'root', passwd = '563255387', db = 'studentmanagersystem', charset = 'utf8')
@@ -53,14 +54,18 @@ def authenticate():
 
 
 @app.route('/showStudents/<pageindex>')
-def showstudents(pageindex = 1):
+def showstudents(pageindex):
     session = DBSession()
+    student_count = session.query(Student).count()
+    page_size = 3
+    page = Page(student_count, int(pageindex), page_size)
     try:
-        students = session.query(Student).all()#.pagination(pageindex, 5, False)
+        students = session.query(Student).offset(page.offset).limit(page.limit)
         list = []
         students[0].to_dict()
         for i in students:
             list.append(i.to_dict())
+        list.append(page.__dict__)
         return ResponseBody(0, list).getContent()
     except Exception as e:
         logging.info(e)
