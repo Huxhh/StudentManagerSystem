@@ -2,7 +2,7 @@
 import MySQLdb as mysql
 import logging
 from flask import Flask, request, session, g, redirect, url_for, \
-     abort, render_template, flash, make_response
+     abort, render_template, flash, make_response, json
 from models import DBSession, Admin, Student
 from responsebody import ResponseBody
 
@@ -47,6 +47,7 @@ def authenticate():
     except Exception as e:
         logging.info(e)
         print e
+        return ResponseBody(1, None)()
     finally:
         session.close()
 
@@ -55,16 +56,21 @@ def authenticate():
 def showstudents(pageindex = 1):
     session = DBSession()
     try:
-        students = session.query(Student).pagintion(pageindex, 5, False)
-        return ResponseBody(1, students).getContent()
+        students = session.query(Student).all()#.pagination(pageindex, 5, False)
+        list = []
+        students[0].to_dict()
+        for i in students:
+            list.append(i.to_dict())
+        return ResponseBody(0, list).getContent()
     except Exception as e:
         logging.info(e)
         print e
+        return ResponseBody(1, None)()
     finally:
         session.close()
 
 
-@app.route('/manage/addStudent')
+@app.route('/manage/addStudent', methods=['POST'])
 def addstudent():
     session = DBSession()
     name = request.form['name']
@@ -72,44 +78,56 @@ def addstudent():
     phone = request.form['phonenumber']
     email = request.form['studentemail']
     try:
-        session.execute(Student, sname = name, sno = no, sphone = phone, semail = email)
+        student = Student(name, no, phone, email)
+        session.add(student)
+        return ResponseBody(0, None).getContent()
     except Exception as e:
         logging.info(e)
         print e
+        return ResponseBody(1, None)()
     finally:
+        session.commit()
         session.close()
 
 
-@app.route('/manage/deleteStudent/<sno>')
-def deletestudent(sno):
+@app.route('/manage/deleteStudent/<sid>', methods=['POST'])
+def deletestudent(sid):
     session = DBSession()
     try:
-        session.delete(Student, sno = sno)
+        student = session.query(Student).filter(Student.id == sid).one()
+        session.delete(student)
+        session.commit()
+        return ResponseBody(0, None)()
     except Exception as e:
         logging.info(e)
         print e
+        return ResponseBody(1, None)()
     finally:
+        session.commit()
         session.close()
 
 
-@app.route('/manage/editStudent/<sno>')
-def editstudent(sno):
+@app.route('/manage/editStudent/<sid>', methods=['POST'])
+def editstudent(sid):
     session = DBSession()
     name = request.form['name']
     no = request.form['studentno']
     phone = request.form['phonenumber']
     email = request.form['studentemail']
     try:
-        student = session.query.get_by(sno = sno)
+        student = session.query(Student).filter(Student.id == sid).one()
         student.sname = name
         student.sno = no
         student.sphone = phone
         student.semail = email
         session.flush()
+        return ResponseBody(0, None)()
     except Exception as e:
         logging.info(e)
         print e
+        return ResponseBody(1, None)()
     finally:
+        session.commit()
         session.close()
 
 

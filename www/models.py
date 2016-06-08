@@ -8,6 +8,12 @@ Base = declarative_base()
 metadata = Base.metadata
 
 
+def to_dict(self):
+    return {c.name: getattr(self, c.name, None) for c in self.__table__.columns}
+
+Base.to_dict = to_dict
+
+
 class Admin(Base):
     __tablename__ = 'admin'
 
@@ -20,6 +26,12 @@ class Admin(Base):
 
 class Student(Base):
     __tablename__ = 'student'
+
+    def __init__(self, sname, sno, sphone, semail):
+        self.sname = sname
+        self.sno = sno
+        self.sphone = sphone
+        self.semail = semail
 
     id = Column(Integer, primary_key=True)
     sname = Column(String(20), nullable=False)
