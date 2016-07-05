@@ -33,23 +33,25 @@ $('#addStuBtn').click(function(){
     });
 });
 
-
+var id;
 $('.deleteStuBtn').click(function(){
-    var id = $(this).attr('data-id');
-    $('#sureDeleteStu').onclick(function(){
-        $.post('/manage/deleteStudent/' + id,
-            {},
-            function(result){
-                if(result.status == 1) {
-                    alert('出错');
-                    location.reload();
-                } else if(result.status == 0){
-                    alert('成功');
-                    location.reload();
-                }
-            });
-    });
+     id = $(this).attr('data-id');
+    //$('#sureDeleteStu').onclick
+
 });
+function del(){
+    $.post('/manage/deleteStudent/' + id,
+        {},
+        function(result){
+            if(result.status == 1) {
+                alert('出错');
+                location.reload();
+            } else if(result.status == 0){
+                alert('成功');
+                location.reload();
+            }
+        });
+};
 //var editStuBtn = $('.editStuBtn');
 //editStuBtn.each(function(i) {
 //    $(this).click(function() {
