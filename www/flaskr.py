@@ -23,16 +23,20 @@ def login():
     if username is None:
         return render_template('login.html')
     else:
-        return render_template('showStudent.html')
+        return redirect(url_for('showstudents', pageindex=1))
 
 
 @app.route('/signout')
 def signout():
-    request.cookies.delete('username')
-    return render_template('login.html')
+    try:
+        resp = make_response(redirect(url_for('login')))
+        resp.delete_cookie('username')
+        return resp
+    except Exception as e:
+        print e
 
 
-@app.route('/auth')
+@app.route('/auth', methods=['POST'])
 def authenticate():
     session = DBSession()
     username = request.form['username']
@@ -43,8 +47,9 @@ def authenticate():
             logging.info('No such Administrator')
             return render_template('login.html')
         else:
-            resp = make_response(render_template('showStudents.html'))
-            resp.set_cookie('username', 'username')
+            resp = make_response(redirect(url_for('showstudents', pageindex=1)))
+            resp.set_cookie('username', username)
+            return resp
     except Exception as e:
         logging.info(e)
         print e
@@ -55,18 +60,21 @@ def authenticate():
 
 @app.route('/showStudents/<pageindex>')
 def showstudents(pageindex):
+    username = request.cookies.get('username')
+    if username is None:
+        return redirect(url_for('login'))
     session = DBSession()
     student_count = session.query(Student).count()
-    page_size = 3
+    page_size = 5
     page = Page(student_count, int(pageindex), page_size)
     try:
         students = session.query(Student).offset(page.offset).limit(page.limit)
         list = []
-        students[0].to_dict()
         for i in students:
             list.append(i.to_dict())
-        list.append(page.__dict__)
-        return ResponseBody(0, list).getContent()
+        # list.append(page.__dict__)
+        # return ResponseBody(0, list).getContent()
+        return render_template("showStudent.html", list=list, page=page.__dict__)
     except Exception as e:
         logging.info(e)
         print e
@@ -82,10 +90,12 @@ def addstudent():
     no = request.form['studentno']
     phone = request.form['phonenumber']
     email = request.form['studentemail']
+    address = request.form['address']
     try:
-        student = Student(name, no, phone, email)
+        student = Student(name, no, phone, email, address)
         session.add(student)
-        return ResponseBody(0, None).getContent()
+        return ResponseBody(0, None)()
+        # return redirect(url_for('showstudents', pageindex=1))
     except Exception as e:
         logging.info(e)
         print e
@@ -119,14 +129,56 @@ def editstudent(sid):
     no = request.form['studentno']
     phone = request.form['phonenumber']
     email = request.form['studentemail']
+    address = request.form['address']
     try:
         student = session.query(Student).filter(Student.id == sid).one()
         student.sname = name
         student.sno = no
         student.sphone = phone
         student.semail = email
+        student.param1 = address
         session.flush()
         return ResponseBody(0, None)()
+    except Exception as e:
+        logging.info(e)
+        print e
+        return ResponseBody(1, None)()
+    finally:
+        session.commit()
+        session.close()
+
+
+@app.route('/search', methods=['POST'])
+def searchstudent():
+    session = DBSession()
+    index = request.form['search']
+    try:
+        if '0' <= index[0] <= '9':
+            try:
+                student = session.query(Student).filter(Student.sno == index)
+                list = []
+                for i in student:
+                    list.append(i.to_dict())
+                if list == []:
+                    return ResponseBody(0, None)()
+                else:
+                    return ResponseBody(0, list)()
+            except Exception as e:
+                print e
+                return ResponseBody(0, None)()
+        else:
+            try:
+                student = session.query(Student).filter(Student.sname == index)
+                list = []
+                for i in student:
+                    list.append(i.to_dict())
+                if list == []:
+                    return ResponseBody(0, None)()
+                else:
+                    return ResponseBody(0, list)()
+            except Exception as e:
+                print e
+                return ResponseBody(0, None)()
     except Exception as e:
         logging.info(e)
         print e

@@ -27,11 +27,12 @@ class Admin(Base):
 class Student(Base):
     __tablename__ = 'student'
 
-    def __init__(self, sname, sno, sphone, semail):
+    def __init__(self, sname, sno, sphone, semail, address):
         self.sname = sname
         self.sno = sno
         self.sphone = sphone
         self.semail = semail
+        self.param1 = address
 
     id = Column(Integer, primary_key=True)
     sname = Column(String(20), nullable=False)

@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="../static/js/jquery-1.12.4.min.js"></script>
+    <script src="../static/js/bootstrap.min.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="../static/css/login.css"/>
+    <link rel="stylesheet" type="text/css" href="../static/css/bootstrap.min.css"/>
+
+    <title>学生管理系统</title>
+</head>
+<body>
+    <nav class="navbar navbar-default">
+        <div class="container">
+            <div class="navbar-header">
+                <img src="../static/img/logo.png" style="height: 50px;float: left;margin-right: 15px">
+                <a class="navbar-brand" href="#">学生管理系统</a>
+            </div>
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+
+                <ul class="nav navbar-nav navbar-right">
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">设置 <span class="caret"></span></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="#"><span class="glyphicon glyphicon-pencil">修改密码</span></a></li>
+                            <li role="separator" class="divider"></li>
+                            <li><a href="/signout"><span class="glyphicon glyphicon-log-out">退出登录</span></a></li>
+                        </ul>
+                    </li>
+                </ul>
+                <input type="text" id="search" name="search" style="float: right;margin-top: 12px;border-radius: 10px" placeholder="请输入学号或姓名查询">
+                <a class="search" href="#"><i class="glyphicon glyphicon-search" style="float: right;margin-right: 10px;margin-top: 11px;font-size: 24px"></i></a>
+            </div>
+        </div>
+    </nav>
+    <div class="container mytab tab-show">
+    <table class="table">
+      <caption>学生基本信息
+          <button type="button" class="btn btn-primary " style="float: right" data-toggle="modal" data-target="#addStudent">
+                    <span class="glyphicon glyphicon-plus"></span>添加
+         </button>
+      </caption>
+
+        <!-- Modal -->
+        <div class="modal fade" id="addStudent" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+            <div class="modal-dialog" role="doucument">
+                <div class="modal-content" >
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="myModalLabel">添加学生信息</h4>
+                    </div>
+                    <div class="modal-body">
+                        <form id="addStuForm" method="post">
+                            <div class="form-group">
+                                <label for="StudentNo">学号</label>
+                                <input type="text" class="form-control" id="StudentNo" name="name" placeholder="学号" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="StudentName">姓名</label>
+                                <input type="text" class="form-control" id="StudentName" name="studentno" placeholder="姓名" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="StudentTel">电话</label>
+                                <input type="tel" class="form-control" id="StudentTel" name="phonenumber" placeholder="电话" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="StudentEmail">邮箱</label>
+                                <input type="email" class="form-control" id="StudentEmail" name="studentemail" placeholder="邮箱" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="StudentAdd">家庭住址</label>
+                                <input type="text" class="form-control" id="StudentAdd" aria-hidden="address" placeholder="家庭住址" required>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                        <button id="addStuBtn" type="button" class="btn btn-primary">提交</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+      <thead>
+        <tr>
+            <th>学号</th>
+            <th>姓名</th>
+            <th>电话</th>
+            <th>邮箱</th>
+            <th>家庭住址</th>
+            <th></th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for stu in list %}
+        <tr>
+            <td>{{stu.sno}}</td>
+            <td>{{stu.sname}}</td>
+            <td>{{stu.sphone}}</td>
+            <td>{{stu.semail}}</td>
+            <td>{{stu.param1}}</td>
+            <td>
+                <button type="button" data-id="{{stu.id}}" class="btn btn-primary editStuBtn" data-toggle="modal" data-target="#editStudent">
+                    <span class="glyphicon glyphicon-edit"></span>编辑
+                </button>
+                <button type="button" data-id="{{stu.id}}" class="btn btn-primary deleteStuBtn" data-toggle="modal" data-target=".bs-example-modal-sm">
+                    <span class="glyphicon glyphicon-remove"></span>删除
+                </button>
+            </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+        <div class="text-center">
+            <ul class="pagination">
+                {% if page.has_previous %}
+                <li><a href="./{{page.page_index - 1}}">&laquo;</a></li>
+                {% else %}
+                <li class="disabled"><a href="#">&laquo;</a></li>
+                {% endif %}
+                {% for i in range(1, page.page_count + 1, 1) %}
+                {% if i == page.page_index %}
+                <li class="active"><a href="./{{i}}">{{i}}</a></li>
+                {% else %}
+                <li><a href="./{{i}}">{{i}}</a></li>
+                {% endif %}
+                {% endfor %}
+                {% if page.has_next %}
+                <li><a href="./{{page.page_index + 1}}">&raquo;</a></li>
+                {% else %}
+                <li class="disabled"><a href="#">&raquo;</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+
+    <!-- editModal -->
+    <div class="modal fade" id="editStudent" tabindex="-1" role="dialog" aria-labelledby="ModalLabel">
+            <div class="modal-dialog" role="doucument">
+                <div class="modal-content" >
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="ModalLabel">编辑该学生信息</h4>
+                    </div>
+                    <div class="modal-body">
+                        <form id="editStuForm" method="post">
+                            <div class="form-group">
+                                <label for="editStudentNo">学号</label>
+                                <input type="text" class="form-control" id="editStudentNo" name="name" placeholder="学号">
+                            </div>
+                            <div class="form-group">
+                                <label for="editStudentName">姓名</label>
+                                <input type="text" class="form-control" id="editStudentName" name="studentno" placeholder="姓名">
+                            </div>
+                            <div class="form-group">
+                                <label for="editStudentTel">电话</label>
+                                <input type="tel" class="form-control" id="editStudentTel" name="phonenumber" placeholder="电话">
+                            </div>
+                            <div class="form-group">
+                                <label for="editStudentEmail">邮箱</label>
+                                <input type="email" class="form-control" id="editStudentEmail" name="studentemail" placeholder="邮箱">
+                            </div>
+                            <div class="form-group">
+                                <label for="editStudentAdd">家庭住址</label>
+                                <input type="text" class="form-control" id="editStudentAdd" aria-hidden="address" placeholder="家庭住址">
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                        <button id="sureEditStu" type="button" class="btn btn-primary">提交</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    <!-- deleteModal -->
+    <div class="modal fade bs-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="mySmallModalLabel">确认删除？</h4>
+                </div>
+                <div class="modal-body">
+                    确认删除该学生信息？删除后不可恢复！
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                    <button id="sureDeleteStu" type="button" class="btn btn-primary">确认</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- searchResultModal -->
+    <div class="modal fade" id="searchResultModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title">查询结果</h4>
+          </div>
+          <div class="modal-body">
+              <ul class="list-group" id="searchList">
+                  <!--<li class="list-group-item">学号:<p class="list-group-item-text" id="sno"></p></li>-->
+                  <!--<li class="list-group-item">姓名:<p class="list-group-item-text" id="sname"></li>-->
+                  <!--<li class="list-group-item">电话:<p class="list-group-item-text" id="sphone"></li>-->
+                  <!--<li class="list-group-item">邮箱:<p class="list-group-item-text" id="semail"></li>-->
+                  <!--<li class="list-group-item">家庭住址:<p class="list-group-item-text" id="saddress"></li>-->
+              </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- noSearchResultModal -->
+    <div class="modal fade" id="noSearchResultModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title">查询结果</h4>
+          </div>
+          <div class="modal-body">
+              <p id="searchText">
+                  查无此人。
+                  <br>
+                  请检查输入的学号或姓名是否有误。
+              </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <script src="../static/js/sms.js"></script>
+</body>
+</html>
